@@ -2,8 +2,12 @@
 name = "bevy-settings"
 version = "0.0.1"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license-file = "LICENSE.md"
+description = "Use a simple struct as persistent settings between game launches. Usefull for e.g. storing the audio settings"
+repository = "https://github.com/tecbeast42/bevy-settings"
+readme = "README.md"
+keywords = ["gamedev", "settings", "persistent"]
+categories = ["game-development"]
 
 [dependencies]
 bevy_app = "0.9.1"
