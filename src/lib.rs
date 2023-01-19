@@ -1,5 +1,7 @@
 extern crate directories;
 
+use std::{marker::PhantomData, path::PathBuf};
+
 use directories::ProjectDirs;
 
 use bevy_app::{App, CoreStage, Plugin};
@@ -11,19 +13,35 @@ use bevy_ecs::{
 pub extern crate serde;
 pub use serde::{Deserialize, Serialize};
 
-const CONFIG_FILE: &str = "cookie-td.toml";
+pub struct SettingsPlugin<S: Resource + Copy + Serialize + Default + for<'a> Deserialize<'a>> {
+    domain: String,
+    company: String,
+    project: String,
+    settings: PhantomData<S>,
+}
 
-pub struct SettingsPlugin<S: Resource + Copy + Serialize + Default + for<'a> Deserialize<'a>>(pub S);
+#[derive(Resource, Debug)]
+pub struct SettingsConfig {
+    directory: PathBuf,
+    path: PathBuf,
+}
 
 impl<S: Resource + Copy + Serialize + Default + for<'a> Deserialize<'a>> SettingsPlugin<S> {
-    pub fn resource() -> S {
-        Self::load().unwrap_or_default()
+    pub fn new(project: impl Into<String>, company: impl Into<String>) -> Self {
+        Self {
+            domain: "com".into(),
+            company: company.into(),
+            project: project.into(),
+            settings: PhantomData::<S>,
+        }
     }
 
-    fn load() -> Option<S> {
-        let path = ProjectDirs::from("com", "TecBeast", "Cookie TD")?
-            .config_dir()
-            .join(CONFIG_FILE);
+    pub fn resource(&self) -> S {
+        self.load().unwrap_or_default()
+    }
+
+    fn load(&self) -> Option<S> {
+        let path = self.path();
         if !path.exists() {
             return Some(S::default());
         }
@@ -31,13 +49,33 @@ impl<S: Resource + Copy + Serialize + Default + for<'a> Deserialize<'a>> Setting
         toml::from_str(&settings_string).ok()
     }
 
-    fn persist(settings: Res<S>, mut reader: EventReader<PersistEvent>) {
+    fn path(&self) -> PathBuf {
+        ProjectDirs::from(&self.domain, &self.company, &self.project)
+            .expect("Couldn't build settings path")
+            .config_dir()
+            .join(format!("{}.toml", self.project))
+    }
+
+    fn settings_directory(&self) -> PathBuf {
+        ProjectDirs::from(&self.domain, &self.company, &self.project)
+            .expect("Couldn't find a folder to store the settings")
+            .config_dir()
+            .to_path_buf()
+    }
+
+    fn persist(
+        settings: Res<S>,
+        config: Res<SettingsConfig>,
+        mut reader: EventReader<PersistSettings>,
+    ) {
         if reader.iter().len() > 0 {
-            let project_dirs = ProjectDirs::from("com", "TecBeast", "Cookie TD").unwrap();
-            let directory = project_dirs.config_dir();
-            std::fs::create_dir_all(directory).expect("Couldn't write a configuration file");
-            let path = (*directory).join(CONFIG_FILE);
-            std::fs::write(path, toml::to_string(&*settings).unwrap()).unwrap();
+            std::fs::create_dir_all(config.directory.clone())
+                .expect("Couldn't create the folders for the settings file");
+            std::fs::write(
+                config.path.clone(),
+                toml::to_string(&*settings).expect("Couldn't serialize the settings to toml"),
+            )
+            .expect("couldn't persist the settings while trying to write the string to disk");
         }
     }
 }
@@ -46,11 +84,14 @@ impl<S: Resource + Copy + Serialize + Default + for<'a> Deserialize<'a>> Plugin
     for SettingsPlugin<S>
 {
     fn build(&self, app: &mut App) {
-        app.insert_resource(Self::resource())
-            .add_event::<PersistEvent>()
+        app.insert_resource(self.resource())
+            .insert_resource(SettingsConfig {
+                directory: self.settings_directory(),
+                path: self.path(),
+            })
+            .add_event::<PersistSettings>()
             .add_system_to_stage(CoreStage::Last, SettingsPlugin::<S>::persist);
     }
 }
 
-pub struct PersistEvent;
-
+pub struct PersistSettings;
