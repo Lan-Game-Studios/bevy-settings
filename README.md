@@ -28,16 +28,8 @@ fn main () {
             "My awesome game studio",
             "The name of the game"
         ))
-        .add_system(read_settings)
-        .add_system(persist_settings)
         .run();
 }
-
-fn read_settings(settings: Res<Settings>) {
-    println!("{}", master_volume);
-}
-
-fn persist_settings(
-    mut reader: EventReader<
-)
 ```
+
+Checkout the basic example to see how to persist the configuration.
