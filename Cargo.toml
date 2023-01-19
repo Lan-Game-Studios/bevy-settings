@@ -8,6 +8,9 @@ repository = "https://github.com/tecbeast42/bevy-settings"
 readme = "README.md"
 keywords = ["gamedev", "settings", "persistent"]
 categories = ["game-development"]
+exclude = [
+    ".github/*",
+]
 
 [dependencies]
 bevy_app = "0.9.1"
@@ -18,3 +21,4 @@ toml = "0.5.10"
 
 [dev-dependencies]
 bevy = "0.9.1"
+
