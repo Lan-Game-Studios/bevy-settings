@@ -32,4 +32,12 @@ fn main () {
 }
 ```
 
+on e.g. my linux machine this will create 
+
+```
+❯ cat ~/.config/myawesomegamestudio/settings.toml 
+master_volume = 0.0
+custom_cursor = false
+```
+
 Checkout the basic example to see how to persist the configuration.
