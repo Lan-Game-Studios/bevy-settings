@@ -17,7 +17,7 @@ bevy_app = "0.9.1"
 bevy_ecs = "0.9.1"
 directories = "4.0.1"
 serde = "1.0.152"
-toml = "0.5.10"
+toml = "0.7.1"
 
 [dev-dependencies]
 bevy = "0.9.1"
