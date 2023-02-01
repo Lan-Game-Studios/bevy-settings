@@ -11,13 +11,32 @@ env:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v3
-    - name: Clean
-      run : cargo clean
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-build-stable-${{ hashFiles('**/Cargo.toml') }}
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev
+      if: runner.os == 'linux'
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+    - name: check rustfmt
+      run: cargo fmt --check
+    - name: check clippy 
+      run: cargo clippy --all-targets --all-features -- -D warnings
     - name: Try to build
       run: cargo build --verbose
     - name: Try to build all examples
