@@ -35,9 +35,14 @@ fn main () {
 on e.g. my linux machine this will create 
 
 ```
-❯ cat ~/.config/myawesomegamestudio/settings.toml 
+❯ cat ~/.config/myawesomegamestudio/My awesome game studio.toml 
 master_volume = 0.0
 custom_cursor = false
 ```
 
 Checkout the basic example to see how to persist the configuration.
+
+| Version | Bevy Version |
+|---------|--------------|
+| 0.1.0   | 0.9          |
+| 0.2.0   | 0.10         |
