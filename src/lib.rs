@@ -4,7 +4,7 @@ use std::{marker::PhantomData, path::PathBuf};
 
 use directories::ProjectDirs;
 
-use bevy_app::{App, CoreStage, Plugin};
+use bevy_app::{App, Plugin};
 use bevy_ecs::{
     prelude::{EventReader, Resource},
     system::Res,
@@ -90,7 +90,7 @@ impl<S: Resource + Copy + Serialize + Default + for<'a> Deserialize<'a>> Plugin
                 path: self.path(),
             })
             .add_event::<PersistSettings>()
-            .add_system_to_stage(CoreStage::Last, SettingsPlugin::<S>::persist);
+            .add_system(SettingsPlugin::<S>::persist);
     }
 }
 

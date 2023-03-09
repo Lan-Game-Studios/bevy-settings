@@ -21,7 +21,7 @@ fn main() {
 }
 
 fn read_settings(settings: Res<Settings>) {
-    println!("{}", settings.master_volume);
+    println!("Master Volume {:?}", settings.master_volume);
 }
 
 fn persist_settings(
