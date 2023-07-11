@@ -11,12 +11,11 @@ struct Settings {
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(bevy_settings::SettingsPlugin::<Settings>::new(
+        .add_plugins(bevy_settings::SettingsPlugin::<Settings>::new(
             "My awesome game studio",
             "The name of the game",
         ))
-        .add_system(read_settings)
-        .add_system(persist_settings)
+        .add_systems(Update, (read_settings, persist_settings))
         .run();
 }
 

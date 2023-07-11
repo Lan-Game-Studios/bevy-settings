@@ -4,14 +4,17 @@ use std::{marker::PhantomData, path::PathBuf};
 
 use directories::ProjectDirs;
 
-use bevy_app::{App, Plugin};
+use bevy_app::{App, Plugin, Update};
 use bevy_ecs::{
-    prelude::{EventReader, Resource},
+    prelude::{EventReader, Resource, Event},
     system::Res,
 };
 
 pub extern crate serde;
 pub use serde::{Deserialize, Serialize};
+
+#[derive(Event)]
+pub struct PersistSettings;
 
 pub struct SettingsPlugin<S: Resource + Copy + Serialize + Default + for<'a> Deserialize<'a>> {
     domain: String,
@@ -90,8 +93,6 @@ impl<S: Resource + Copy + Serialize + Default + for<'a> Deserialize<'a>> Plugin
                 path: self.path(),
             })
             .add_event::<PersistSettings>()
-            .add_system(SettingsPlugin::<S>::persist);
+            .add_systems(Update, SettingsPlugin::<S>::persist);
     }
 }
-
-pub struct PersistSettings;
