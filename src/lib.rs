@@ -6,7 +6,7 @@ use directories::ProjectDirs;
 
 use bevy_app::{App, Plugin, Update};
 use bevy_ecs::{
-    prelude::{EventReader, Resource, Event},
+    prelude::{Event, EventReader, Resource},
     system::Res,
 };
 
