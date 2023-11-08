@@ -69,9 +69,9 @@ impl<S: Resource + Copy + Serialize + Default + for<'a> Deserialize<'a>> Setting
     fn persist(
         settings: Res<S>,
         config: Res<SettingsConfig>,
-        mut reader: EventReader<PersistSettings>,
+        reader: EventReader<PersistSettings>,
     ) {
-        if reader.iter().len() > 0 {
+        if !reader.is_empty() {
             std::fs::create_dir_all(config.directory.clone())
                 .expect("Couldn't create the folders for the settings file");
             std::fs::write(
