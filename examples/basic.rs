@@ -25,10 +25,10 @@ fn read_settings(settings: Res<Settings>) {
 
 fn persist_settings(
     settings: Res<Settings>,
-    keys: Res<Input<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
     mut writer: EventWriter<PersistSettings>,
 ) {
-    if keys.just_pressed(KeyCode::S) {
+    if keys.just_pressed(KeyCode::KeyS) {
         println!("Persisting Config {:?}", settings.into_inner());
         writer.send(PersistSettings);
     }

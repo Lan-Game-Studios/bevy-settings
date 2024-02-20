@@ -48,3 +48,4 @@ Checkout the basic example to see how to persist the configuration.
 | 0.2.0   | 0.10         |
 | 0.3.1   | 0.11         |
 | 0.4.0   | 0.12         |
+| 0.5.0   | 0.13         |
