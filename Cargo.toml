@@ -2,7 +2,7 @@
 name = "bevy-settings"
 version = "0.4.0"
 edition = "2021"
-license-file = "LICENSE.md"
+license = "MIT"
 description = "Use a simple struct as persistent settings between game launches. Usefull for e.g. storing the audio settings"
 repository = "https://github.com/tecbeast42/bevy-settings"
 readme = "README.md"
