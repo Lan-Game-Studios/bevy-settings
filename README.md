@@ -1,5 +1,11 @@
 # Bevy Settings
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Doc](https://docs.rs/bevy-settings/badge.svg)](https://docs.rs/bevy-settings)
+[![Crate](https://img.shields.io/crates/v/bevy-settings.svg)](https://crates.io/crates/bevy-settings)
+[![Build Status](https://github.com/tecbeast42/bevy-settings/actions/workflows/rust.yml/badge.svg)](https://github.com/tecbeast42/bevy-settings/actions/workflows/rust.yml)
+[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.13-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
+
 The goal of this project is to store settings in a resource throughout game launches.
 
 Currently this crate supports Linux, Mac and Windows.
