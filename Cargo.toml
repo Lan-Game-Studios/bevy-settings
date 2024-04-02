@@ -13,12 +13,14 @@ exclude = [
 ]
 
 [dependencies]
-bevy_app = "0.13.0"
-bevy_ecs = "0.13.0"
+bevy_app = "0.13"
+bevy_ecs = "0.13"
+bevy_log = "0.13"
 directories = "5"
 serde = "1"
-toml = "0.7"
+toml = "0.8"
 
 [dev-dependencies]
-bevy = "0.13.0"
-
+bevy = "0.13"
+pretty_assertions = "1"
+rand = "0.8"

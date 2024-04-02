@@ -1,3 +1,5 @@
+use std::{thread::sleep, time::Duration};
+
 use bevy::prelude::*;
 use bevy_settings::{Deserialize, PersistSettings, Serialize};
 
@@ -6,6 +8,7 @@ use bevy_settings::{Deserialize, PersistSettings, Serialize};
 struct Settings {
     master_volume: f64,
     custom_cursor: bool,
+    something: usize,
 }
 
 fn main() {
@@ -21,14 +24,17 @@ fn main() {
 
 fn read_settings(settings: Res<Settings>) {
     println!("Master Volume {:?}", settings.master_volume);
+    sleep(Duration::from_millis(500));
 }
 
 fn persist_settings(
-    settings: Res<Settings>,
+    mut settings: ResMut<Settings>,
     keys: Res<ButtonInput<KeyCode>>,
     mut writer: EventWriter<PersistSettings>,
 ) {
     if keys.just_pressed(KeyCode::KeyS) {
+        settings.master_volume += 1.0;
+        settings.something = 10_000;
         println!("Persisting Config {:?}", settings.into_inner());
         writer.send(PersistSettings);
     }
