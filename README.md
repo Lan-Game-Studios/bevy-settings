@@ -46,6 +46,12 @@ master_volume = 0.0
 custom_cursor = false
 ```
 
+## Roadmap
+
+- [x] multi storage support
+- [ ] file naming support
+- [ ] obfuscation support, this should just make it minimal hard to change the data, it is not really secure
+
 ## Known limitations
 
 - the toml crate has problems with large numbers e.g. u64::MAX 
