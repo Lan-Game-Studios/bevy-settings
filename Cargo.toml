@@ -1,6 +1,6 @@
 [package]
 name = "bevy-settings"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 license = "MIT"
 description = "Use a simple struct as persistent settings between game launches. Usefull for e.g. storing the audio settings"

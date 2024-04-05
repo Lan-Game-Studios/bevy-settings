@@ -1,6 +1,6 @@
 extern crate directories;
 
-use std::{marker::PhantomData, path::PathBuf};
+use std::{fmt::Debug, marker::PhantomData, path::PathBuf};
 
 use directories::ProjectDirs;
 
@@ -14,6 +14,12 @@ use bevy_log::prelude::debug;
 pub extern crate serde;
 pub use serde::{Deserialize, Serialize};
 
+/// this is a blanked trait
+pub trait Settingable: Resource + Clone + Serialize + Default + for<'a> Deserialize<'a> {}
+
+/// this is a blanked implementation of [`Settingable`]
+impl<S> Settingable for S where S: Resource + Clone + Serialize + Default + for<'a> Deserialize<'a> {}
+
 /// This will persist all structs that
 /// are added via the Plugin [`SettingsPlugin`]
 #[derive(Event)]
@@ -22,11 +28,9 @@ pub struct PersistSettings;
 /// This will persist structs S that
 /// was added via the Plugin [`SettingsPlugin`]
 #[derive(Event, Default)]
-pub struct PersistSetting<S: Resource + Clone + Serialize + Default + for<'a> Deserialize<'a>>(
-    PhantomData<S>,
-);
+pub struct PersistSetting<S: Settingable>(PhantomData<S>);
 
-pub struct SettingsPlugin<S: Resource + Clone + Serialize + Default + for<'a> Deserialize<'a>> {
+pub struct SettingsPlugin<S: Settingable> {
     domain: String,
     company: String,
     project: String,
@@ -34,13 +38,13 @@ pub struct SettingsPlugin<S: Resource + Clone + Serialize + Default + for<'a> De
 }
 
 #[derive(Resource, Debug)]
-pub struct SettingsConfig<S: Resource + Clone + Serialize + Default + for<'a> Deserialize<'a>> {
+pub struct SettingsConfig<S: Settingable> {
     directory: PathBuf,
     path: PathBuf,
     settings: PhantomData<S>,
 }
 
-impl<S: Resource + Clone + Serialize + Default + for<'a> Deserialize<'a>> SettingsPlugin<S> {
+impl<S: Settingable> SettingsPlugin<S> {
     pub fn new(company: impl Into<String>, project: impl Into<String>) -> Self {
         Self {
             domain: "com".into(),
@@ -96,9 +100,7 @@ impl<S: Resource + Clone + Serialize + Default + for<'a> Deserialize<'a>> Settin
     }
 }
 
-impl<S: Resource + Clone + Serialize + Default + for<'a> Deserialize<'a>> Plugin
-    for SettingsPlugin<S>
-{
+impl<S: Settingable> Plugin for SettingsPlugin<S> {
     fn build(&self, app: &mut App) {
         app.insert_resource(self.resource())
             .insert_resource(SettingsConfig {
@@ -116,23 +118,26 @@ impl<S: Resource + Clone + Serialize + Default + for<'a> Deserialize<'a>> Plugin
 mod tests {
     use super::{PersistSettings, SettingsPlugin};
     use bevy::prelude::*;
-    use pretty_assertions::assert_eq;
+    use pretty_assertions::{assert_eq, assert_ne};
 
+    use crate::PersistSetting;
     pub use crate::{Deserialize, Serialize};
 
-    #[derive(Resource, Default, Serialize, Deserialize, Clone, Debug)]
-    #[serde(crate = "crate::serde")]
-    struct TestSetting1(isize);
+    #[derive(Resource, Default, Serialize, Deserialize, Clone)]
+    struct TestSetting1 {
+        test: u32,
+    }
 
-    #[derive(Resource, Default, Serialize, Deserialize, Clone, Debug)]
-    #[serde(crate = "crate::serde")]
-    struct TestSetting2(isize);
+    #[derive(Resource, Default, Serialize, Deserialize, Clone)]
+    struct TestSetting2 {
+        test: u32,
+    }
 
     #[test]
     fn it_should_store_multiple_settings() {
         let mut app1 = App::new();
-        let isize_1: isize = rand::random::<isize>();
-        let isize_2: isize = rand::random::<isize>();
+        let u32_1: u32 = rand::random::<u32>();
+        let u32_2: u32 = rand::random::<u32>();
         app1.add_plugins(SettingsPlugin::<TestSetting1>::new(
             "Bevy Settings Test Corp",
             "Some Game File 1",
@@ -146,9 +151,8 @@ mod tests {
             move |mut writer: EventWriter<PersistSettings>,
                   mut test_setting_1: ResMut<TestSetting1>,
                   mut test_setting_2: ResMut<TestSetting2>| {
-                println!("{isize_1} {isize_2}");
-                *test_setting_1 = TestSetting1(isize_1);
-                *test_setting_2 = TestSetting2(isize_2);
+                *test_setting_1 = TestSetting1 { test: u32_1 };
+                *test_setting_2 = TestSetting2 { test: u32_2 };
                 writer.send(PersistSettings);
             },
         );
@@ -166,8 +170,50 @@ mod tests {
         ));
         app2.update();
         let test_setting_1 = app2.world.resource::<TestSetting1>();
-        assert_eq!(test_setting_1.0, isize_1);
+        assert_eq!(test_setting_1.test, u32_1);
         let test_setting_2 = app2.world.resource::<TestSetting2>();
-        assert_eq!(test_setting_2.0, isize_2);
+        assert_eq!(test_setting_2.test, u32_2);
+    }
+
+    #[test]
+    fn it_should_store_singular_settings() {
+        let mut app1 = App::new();
+        let u32_1: u32 = rand::random::<u32>();
+        let u32_2: u32 = rand::random::<u32>();
+        app1.add_plugins(SettingsPlugin::<TestSetting1>::new(
+            "Bevy Settings Test Corp",
+            "Some Game File 1",
+        ));
+        app1.add_plugins(SettingsPlugin::<TestSetting2>::new(
+            "Bevy Settings Test Corp",
+            "Some Game File 2",
+        ));
+        app1.add_systems(
+            Update,
+            move |mut writer: EventWriter<PersistSetting<TestSetting1>>,
+                  mut test_setting_1: ResMut<TestSetting1>,
+                  mut test_setting_2: ResMut<TestSetting2>| {
+                *test_setting_1 = TestSetting1 { test: u32_1 };
+                *test_setting_2 = TestSetting2 { test: u32_2 };
+                writer.send(PersistSetting::default());
+            },
+        );
+        app1.update(); // send event
+        app1.update(); // react to persist
+
+        let mut app2 = App::new();
+        app2.add_plugins(SettingsPlugin::<TestSetting1>::new(
+            "Bevy Settings Test Corp",
+            "Some Game File 1",
+        ));
+        app2.add_plugins(SettingsPlugin::<TestSetting2>::new(
+            "Bevy Settings Test Corp",
+            "Some Game File 2",
+        ));
+        app2.update();
+        let test_setting_1 = app2.world.resource::<TestSetting1>();
+        assert_eq!(test_setting_1.test, u32_1);
+        let test_setting_2 = app2.world.resource::<TestSetting2>();
+        assert_ne!(test_setting_2.test, u32_2);
     }
 }

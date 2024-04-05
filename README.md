@@ -46,6 +46,11 @@ master_volume = 0.0
 custom_cursor = false
 ```
 
+## Known limitations
+
+- the toml crate has problems with large numbers e.g. u64::MAX 
+- there is a problem with tuple structs e.g. `TestSetting(u32)` does not work but `TestSetting{ test: u32 }` works fine.
+
 Checkout the basic example to see how to persist the configuration.
 
 | Version | Bevy Version |
