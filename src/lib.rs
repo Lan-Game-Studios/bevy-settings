@@ -8,10 +8,7 @@ use bevy_app::{App, Plugin, Update};
 use bevy_ecs::{
     event::EventWriter,
     prelude::{Event, EventReader, Resource},
-    schedule::{
-        common_conditions::resource_changed,
-        IntoSystemConfigs,
-    },
+    schedule::{common_conditions::resource_changed, IntoSystemConfigs},
     system::Res,
 };
 use bevy_log::prelude::debug;
@@ -131,9 +128,7 @@ impl<S: Settingable> Plugin for SettingsPlugin<S> {
             app.add_systems(
                 Update,
                 SettingsPlugin::<S>::trigger_autosave
-                    .run_if(
-                        resource_changed::<SettingsConfig<S>>
-                    )
+                    .run_if(resource_changed::<SettingsConfig<S>>)
                     .before(SettingsPlugin::<S>::persist),
             );
         }
@@ -250,10 +245,10 @@ mod tests {
     #[serial]
     fn it_sould_trigger_autosave() {
         let mut app = App::new();
-        app.add_plugins(SettingsPlugin::<TestSetting1>::new(
-                "Bevy Settings Test Corp",
-                "Some Game File 1",
-                ).autosave());
+        app.add_plugins(
+            SettingsPlugin::<TestSetting1>::new("Bevy Settings Test Corp", "Some Game File 1")
+                .autosave(),
+        );
         app.add_systems(PreUpdate, move |mut setting: ResMut<TestSetting1>| {
             setting.test = 9;
         });
@@ -261,9 +256,9 @@ mod tests {
 
         let mut app2 = App::new();
         app2.add_plugins(SettingsPlugin::<TestSetting1>::new(
-                "Bevy Settings Test Corp",
-                "Some Game File 1",
-                ));
+            "Bevy Settings Test Corp",
+            "Some Game File 1",
+        ));
         app2.update();
         let test_setting = app2.world.resource::<TestSetting1>();
         assert_eq!(test_setting.test, 9);
