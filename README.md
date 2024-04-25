@@ -30,10 +30,15 @@ struct Settings {
 
 fn main () {
     App::new()
-        .add_plugin(bevy_settings::SettingsPlugin::<Settings>::new(
+        .add_plugins(bevy_settings::SettingsPlugin::<Settings>::new(
             "My awesome game studio",
             "The name of the game"
         ))
+        // Or with autosave when the resource is changed
+        .add_plugins(bevy_settings::SettingPlugin::<Settings>::new(
+            "My awesome game studio",
+            "The name of the game"
+        ).autosave())
         .run();
 }
 ```

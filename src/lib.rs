@@ -6,7 +6,12 @@ use directories::ProjectDirs;
 
 use bevy_app::{App, Plugin, Update};
 use bevy_ecs::{
+    event::EventWriter,
     prelude::{Event, EventReader, Resource},
+    schedule::{
+        common_conditions::resource_changed,
+        IntoSystemConfigs,
+    },
     system::Res,
 };
 use bevy_log::prelude::debug;
@@ -35,6 +40,7 @@ pub struct SettingsPlugin<S: Settingable> {
     company: String,
     project: String,
     settings: PhantomData<S>,
+    autosave: bool,
 }
 
 #[derive(Resource, Debug)]
@@ -51,7 +57,13 @@ impl<S: Settingable> SettingsPlugin<S> {
             company: company.into(),
             project: project.into(),
             settings: PhantomData::<S>,
+            autosave: false,
         }
+    }
+
+    pub fn autosave(mut self) -> Self {
+        self.autosave = true;
+        self
     }
 
     pub fn resource(&self) -> S {
@@ -98,6 +110,10 @@ impl<S: Settingable> SettingsPlugin<S> {
             .expect("couldn't persist the settings while trying to write the string to disk");
         }
     }
+
+    fn trigger_autosave(mut writer: EventWriter<PersistSetting<S>>) {
+        writer.send_default();
+    }
 }
 
 impl<S: Settingable> Plugin for SettingsPlugin<S> {
@@ -111,6 +127,16 @@ impl<S: Settingable> Plugin for SettingsPlugin<S> {
             .add_event::<PersistSettings>()
             .add_event::<PersistSetting<S>>()
             .add_systems(Update, SettingsPlugin::<S>::persist);
+        if self.autosave {
+            app.add_systems(
+                Update,
+                SettingsPlugin::<S>::trigger_autosave
+                    .run_if(
+                        resource_changed::<SettingsConfig<S>>
+                    )
+                    .before(SettingsPlugin::<S>::persist),
+            );
+        }
     }
 }
 
@@ -119,6 +145,7 @@ mod tests {
     use super::{PersistSettings, SettingsPlugin};
     use bevy::prelude::*;
     use pretty_assertions::{assert_eq, assert_ne};
+    use serial_test::serial;
 
     use crate::PersistSetting;
     pub use crate::{Deserialize, Serialize};
@@ -134,6 +161,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn it_should_store_multiple_settings() {
         let mut app1 = App::new();
         let u32_1: u32 = rand::random::<u32>();
@@ -176,6 +204,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn it_should_store_singular_settings() {
         let mut app1 = App::new();
         let u32_1: u32 = rand::random::<u32>();
@@ -215,5 +244,28 @@ mod tests {
         assert_eq!(test_setting_1.test, u32_1);
         let test_setting_2 = app2.world.resource::<TestSetting2>();
         assert_ne!(test_setting_2.test, u32_2);
+    }
+
+    #[test]
+    #[serial]
+    fn it_sould_trigger_autosave() {
+        let mut app = App::new();
+        app.add_plugins(SettingsPlugin::<TestSetting1>::new(
+                "Bevy Settings Test Corp",
+                "Some Game File 1",
+                ).autosave());
+        app.add_systems(PreUpdate, move |mut setting: ResMut<TestSetting1>| {
+            setting.test = 9;
+        });
+        app.update();
+
+        let mut app2 = App::new();
+        app2.add_plugins(SettingsPlugin::<TestSetting1>::new(
+                "Bevy Settings Test Corp",
+                "Some Game File 1",
+                ));
+        app2.update();
+        let test_setting = app2.world.resource::<TestSetting1>();
+        assert_eq!(test_setting.test, 9);
     }
 }

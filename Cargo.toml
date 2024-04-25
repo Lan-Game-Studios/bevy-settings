@@ -18,6 +18,7 @@ bevy_ecs = "0.13"
 bevy_log = "0.13"
 directories = "5"
 serde = "1"
+serial_test = "3.1.0"
 toml = "0.8"
 
 [dev-dependencies]
