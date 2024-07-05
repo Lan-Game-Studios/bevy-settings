@@ -87,8 +87,25 @@ impl<S: Settingable> SettingsPlugin<S> {
         reader_single: EventReader<PersistSetting<S>>,
         reader_all: EventReader<PersistSettings>,
     ) {
-        debug!("System persist called");
         if !reader_single.is_empty() || !reader_all.is_empty() {
+            match (!reader_single.is_empty(), !reader_all.is_empty()) {
+                (true, true) => debug!(
+                    "Persist called on {} to path {:?} and also through the global event",
+                    std::any::type_name::<S>(),
+                    config.path
+                ),
+                (true, false) => debug!(
+                    "Persist called through global event to path {:?}",
+                    config.path
+                ),
+                (false, true) => debug!(
+                    "Persist called on {} to path {:?}",
+                    std::any::type_name::<S>(),
+                    config.path
+                ),
+                (false, false) => {}
+            }
+
             std::fs::create_dir_all(config.directory.clone())
                 .expect("Couldn't create the folders for the settings file");
             std::fs::write(
@@ -114,6 +131,9 @@ impl<S: Settingable> Plugin for SettingsPlugin<S> {
     }
 }
 
+/// tests need to run in serial
+/// since they consume the filesystem
+/// on an user basis
 #[cfg(test)]
 mod tests {
     use super::{PersistSettings, SettingsPlugin};
@@ -134,6 +154,7 @@ mod tests {
     }
 
     #[test]
+    #[serial_test::serial]
     fn it_should_store_multiple_settings() {
         let mut app1 = App::new();
         let u32_1: u32 = rand::random::<u32>();
@@ -169,13 +190,15 @@ mod tests {
             "Some Game File 2",
         ));
         app2.update();
-        let test_setting_1 = app2.world.resource::<TestSetting1>();
-        assert_eq!(test_setting_1.test, u32_1);
-        let test_setting_2 = app2.world.resource::<TestSetting2>();
-        assert_eq!(test_setting_2.test, u32_2);
+        let world2 = app2.world();
+        let test_setting_1 = world2.resource::<TestSetting1>();
+        assert_eq!(test_setting_1.test, u32_1, "Failed to verify TestSetting1");
+        let test_setting_2 = world2.resource::<TestSetting2>();
+        assert_eq!(test_setting_2.test, u32_2, "Failed to verify TestSetting2");
     }
 
     #[test]
+    #[serial_test::serial]
     fn it_should_store_singular_settings() {
         let mut app1 = App::new();
         let u32_1: u32 = rand::random::<u32>();
@@ -211,9 +234,10 @@ mod tests {
             "Some Game File 2",
         ));
         app2.update();
-        let test_setting_1 = app2.world.resource::<TestSetting1>();
-        assert_eq!(test_setting_1.test, u32_1);
-        let test_setting_2 = app2.world.resource::<TestSetting2>();
-        assert_ne!(test_setting_2.test, u32_2);
+        let world2 = app2.world();
+        let test_setting_1 = world2.resource::<TestSetting1>();
+        assert_eq!(test_setting_1.test, u32_1, "Failed to verify TestSetting1");
+        let test_setting_2 = world2.resource::<TestSetting2>();
+        assert_ne!(test_setting_2.test, u32_2, "Failed to verify TestSetting2");
     }
 }
