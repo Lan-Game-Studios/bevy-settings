@@ -19,7 +19,11 @@ struct PlayerProfile {
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(bevy_log::LogPlugin {
+            filter: "warn,bevy_settings=debug".into(),
+            level: bevy::log::Level::DEBUG,
+            ..default()
+        }))
         .add_plugins(bevy_settings::SettingsPlugin::<Settings>::new(
             "My awesome game studio",
             "The name of the game settings",

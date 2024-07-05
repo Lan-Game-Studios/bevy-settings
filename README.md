@@ -66,3 +66,4 @@ Checkout the basic example to see how to persist the configuration.
 | 0.3.1   | 0.11         |
 | 0.4.0   | 0.12         |
 | 0.5.0   | 0.13         |
+| 0.6.0   | 0.14         |
