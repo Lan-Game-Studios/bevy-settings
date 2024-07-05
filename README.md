@@ -4,7 +4,7 @@
 [![Doc](https://docs.rs/bevy-settings/badge.svg)](https://docs.rs/bevy-settings)
 [![Crate](https://img.shields.io/crates/v/bevy-settings.svg)](https://crates.io/crates/bevy-settings)
 [![Build Status](https://github.com/tecbeast42/bevy-settings/actions/workflows/rust.yml/badge.svg)](https://github.com/tecbeast42/bevy-settings/actions/workflows/rust.yml)
-[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.13-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
+[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.14-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
 
 The goal of this project is to store settings in a resource throughout game launches.
 
