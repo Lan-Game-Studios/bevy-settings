@@ -52,10 +52,10 @@ fn persist_profile_setting(
     if keys.just_pressed(KeyCode::KeyS) {
         profile.highscore += 1.0;
         println!("Persisting Config {:?}", profile.into_inner());
-        writer.send(PersistSetting::default());
+        writer.write(PersistSetting::default());
     }
     if keys.just_pressed(KeyCode::KeyA) {
         println!("Persisting All Config");
-        writer_all.send(PersistSettings);
+        writer_all.write(PersistSettings);
     }
 }

@@ -174,7 +174,7 @@ mod tests {
                   mut test_setting_2: ResMut<TestSetting2>| {
                 *test_setting_1 = TestSetting1 { test: u32_1 };
                 *test_setting_2 = TestSetting2 { test: u32_2 };
-                writer.send(PersistSettings);
+                writer.write(PersistSettings);
             },
         );
         app1.update(); // send event
@@ -218,7 +218,7 @@ mod tests {
                   mut test_setting_2: ResMut<TestSetting2>| {
                 *test_setting_1 = TestSetting1 { test: u32_1 };
                 *test_setting_2 = TestSetting2 { test: u32_2 };
-                writer.send(PersistSetting::default());
+                writer.write(PersistSetting::default());
             },
         );
         app1.update(); // send event

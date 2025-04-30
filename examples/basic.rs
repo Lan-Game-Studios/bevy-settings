@@ -40,6 +40,6 @@ fn persist_settings(
         settings.master_volume += 1.0;
         settings.something = 10_000;
         println!("Persisting Config {:?}", settings.into_inner());
-        writer.send(PersistSettings);
+        writer.write(PersistSettings);
     }
 }
