@@ -1,6 +1,6 @@
 [package]
 name = "bevy-settings"
-version = "0.7.0"
+version = "0.7.1"
 edition = "2021"
 license = "MIT"
 description = "Use a simple struct as persistent settings between game launches. Usefull for e.g. storing the audio settings"
@@ -13,15 +13,15 @@ exclude = [
 ]
 
 [dependencies]
-bevy_app = "0.16.0"
-bevy_ecs = "0.16.0"
-bevy_log = "0.16.0"
+bevy_app = "0.16"
+bevy_ecs = "0.16"
+bevy_log = "0.16"
 directories = "6"
 serde = "1"
 toml = "0.8"
 
 [dev-dependencies]
-bevy = "0.16.0"
+bevy = "0.16"
 pretty_assertions = "1.4"
 rand = "0.9"
 serial_test = "3.1.1"
